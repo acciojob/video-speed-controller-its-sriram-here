@@ -1,37 +1,49 @@
+// Grab all the elements
 const video = document.querySelector('.viewer');
 const toggle = document.querySelector('.toggle');
+const volume = document.querySelector('input[name="volume"]');
+const playbackSpeed = document.querySelector('input[name="playbackRate"]');
 const skipButtons = document.querySelectorAll('[data-skip]');
-const ranges = document.querySelectorAll('.controls input');
 const progress = document.querySelector('.progress');
 const progressBar = document.querySelector('.progress__filled');
 
+// Toggle Play/Pause
 function togglePlay() {
-  const method = video.paused ? 'play' : 'pause';
-  video[method]();
+  if (video.paused) {
+    video.play();
+  } else {
+    video.pause();
+  }
 }
 
+// Update play/pause button icon
 function updateButton() {
   toggle.textContent = video.paused ? '►' : '❚ ❚';
 }
 
+// Handle volume and playback speed changes
+function handleRangeUpdate() {
+  video[this.name] = parseFloat(this.value);
+}
+
+// Skip forward/backward
 function skip() {
   video.currentTime += parseFloat(this.dataset.skip);
 }
 
-function handleRangeUpdate() {
-  video[this.name] = this.value;
-}
-
+// Update progress bar
 function handleProgress() {
   const percent = (video.currentTime / video.duration) * 100;
-  progressBar.style.flexBasis = `${percent}%`;
+  progressBar.style.width = `${percent}%`;
 }
 
+// Scrub on progress bar
 function scrub(e) {
   const scrubTime = (e.offsetX / progress.offsetWidth) * video.duration;
   video.currentTime = scrubTime;
 }
 
+// Event listeners
 video.addEventListener('click', togglePlay);
 video.addEventListener('play', updateButton);
 video.addEventListener('pause', updateButton);
@@ -39,13 +51,9 @@ video.addEventListener('timeupdate', handleProgress);
 
 toggle.addEventListener('click', togglePlay);
 
+volume.addEventListener('input', handleRangeUpdate);
+playbackSpeed.addEventListener('input', handleRangeUpdate);
+
 skipButtons.forEach(button => button.addEventListener('click', skip));
 
-ranges.forEach(input => input.addEventListener('change', handleRangeUpdate));
-ranges.forEach(input => input.addEventListener('mousemove', handleRangeUpdate));
-
-let mousedown = false;
 progress.addEventListener('click', scrub);
-progress.addEventListener('mousemove', (e) => mousedown && scrub(e));
-progress.addEventListener('mousedown', () => mousedown = true);
-progress.addEventListener('mouseup', () => mousedown = false);
